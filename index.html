@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Clínica Foz — Demo Interativa do Modelo 2</title>
+<style>
+:root{
+  --bg:#f4f8fb; --card:#ffffff; --blue:#18a9e6; --blue-dark:#0d7fb0; --text:#1f2937;
+  --muted:#6b7280; --border:#dbe6ee; --green:#16a34a; --red:#dc2626; --yellow:#f59e0b;
+  --shadow:0 12px 28px rgba(0,0,0,0.08); --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.header{background:linear-gradient(135deg,#18a9e6,#0d7fb0);color:#fff;padding:24px 28px;border-radius:0 0 22px 22px}
+.header h2{margin:0 0 6px;font-size:30px}.header p{margin:0;opacity:.95}
+.container{max-width:1220px;margin:auto;padding:20px}
+.notice{background:#eef9ff;border:1px solid #bde6f7;color:#0b6f97;padding:12px 14px;border-radius:12px;font-size:13px;margin:0 0 16px;position:relative;z-index:3}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-top:0;margin-bottom:18px}
+.card{background:var(--card);padding:18px;border-radius:15px;box-shadow:var(--shadow);border:1px solid rgba(24,169,230,.08)}
+.card strong{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.card span{display:block;font-size:28px;font-weight:800;margin-top:8px}
+.card small{display:block;margin-top:8px;font-weight:700}
+.menu{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
+.menu button,.subactions button,.cta{background:#fff;border:1px solid var(--border);padding:11px 15px;border-radius:12px;cursor:pointer;font-weight:700;color:var(--text);box-shadow:var(--shadow);display:inline-flex;align-items:center;justify-content:center;min-height:44px}
+.menu button.active{background:linear-gradient(135deg,#18a9e6,#0d7fb0);color:#fff;border-color:transparent}
+.subactions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+.subactions button.primary,.cta.primary,.subactions .primary{background:linear-gradient(135deg,#18a9e6,#0d7fb0);color:#fff;border-color:transparent}
+.section{display:none;background:var(--card);padding:20px;border-radius:16px;box-shadow:var(--shadow);margin-bottom:18px;border:1px solid rgba(24,169,230,.08)}
+.section.active{display:block}
+.section h3{margin:0 0 14px;font-size:22px}
+.section p.sub{margin:-6px 0 16px;color:var(--muted)}
+.kpi-row{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
+.panel{background:#f8fbff;border:1px solid var(--border);border-radius:14px;padding:16px}
+.panel h4{margin:0 0 12px;font-size:16px}
+table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:left} th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.status{padding:5px 10px;border-radius:999px;font-size:12px;font-weight:800;display:inline-block}
+.open{background:#fff3cd;color:#856404}.paid{background:#d4edda;color:#155724}.late{background:#f8d7da;color:#721c24}
+.chart-wrap{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px}
+.legend{font-size:13px;color:var(--muted);margin-top:8px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.list{display:grid;gap:10px}.list .item{background:#fff;border:1px solid var(--border);padding:14px;border-radius:12px;display:flex;justify-content:space-between;gap:12px}
+.badge{background:#e9f9ff;color:#0b6f97;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.38);display:none;align-items:center;justify-content:center;padding:16px;z-index:100}.modal-backdrop.show{display:flex}
+.modal{width:min(720px,100%);background:#fff;border-radius:18px;box-shadow:0 22px 60px rgba(0,0,0,.2);padding:22px}
+.modal h3{margin:0 0 8px}.modal p{color:var(--muted)}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.form .full{grid-column:1/-1}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:12px;font:inherit}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+.toast{position:fixed;right:18px;bottom:18px;background:#12364a;color:#fff;padding:14px 16px;border-radius:12px;box-shadow:var(--shadow);display:none;z-index:120;max-width:min(360px,calc(100vw - 36px))}.toast.show{display:block}
+.footer-note{font-size:12px;color:var(--muted);margin-top:8px}
+@media (max-width:1100px){.cards{grid-template-columns:repeat(2,1fr)}.kpi-row,.grid-2,.form{grid-template-columns:1fr}} @media (max-width:700px){.cards{grid-template-columns:1fr}.header h2{font-size:24px}.menu,.subactions{flex-direction:column;align-items:stretch}.menu button,.subactions button{width:100%}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h2>Clínica Foz — Sistema Financeiro Estruturado</h2>
+  <p>Demonstração interativa do modelo recomendado</p>
+</div>
+
+<div class="container">
+  <div class="notice">Demo navegável para apresentação comercial. Os botões funcionam para simular o uso do sistema, sem gravação real de dados.</div>
+
+  <div class="cards">
+    <div class="card"><strong>Saldo Atual</strong><span>R$ 18.420</span><small style="color:var(--green)">▲ saudável</small></div>
+    <div class="card"><strong>A Receber</strong><span>R$ 12.800</span><small style="color:var(--yellow)">3 vencimentos próximos</small></div>
+    <div class="card"><strong>A Pagar</strong><span>R$ 8.950</span><small style="color:var(--red)">2 atrasos</small></div>
+    <div class="card"><strong>Resultado</strong><span>R$ 3.850</span><small style="color:var(--green)">▲ positivo</small></div>
+  </div>
+
+  <div class="menu">
+    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="receber">Contas a Receber</button>
+    <button class="tab-btn" data-tab="pagar">Contas a Pagar</button>
+    <button class="tab-btn" data-tab="fluxo">Fluxo de Caixa</button>
+    <button class="tab-btn" data-tab="resumo">Resumo Gerencial</button>
+  </div>
+
+  <div class="subactions">
+    <button class="primary" id="btn-receber">+ Novo recebimento</button>
+    <button id="btn-pagar">+ Nova conta a pagar</button>
+    <button id="btn-exportar">Exportar relatório</button>
+  </div>
+
+  <section id="dashboard" class="section active">
+    <h3>Visão Financeira do Mês</h3>
+    <p class="sub">Controle com leitura simples do desempenho financeiro.</p>
+    <div class="kpi-row">
+      <div class="chart-wrap">
+        <svg viewBox="0 0 420 140" style="width:100%;height:170px">
+          <defs>
+            <linearGradient id="grad1" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#18a9e6" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#18a9e6" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <polyline fill="url(#grad1)" stroke="none" points="0,125 0,90 80,70 160,75 240,50 320,55 420,40 420,125"/>
+          <polyline fill="none" stroke="#18a9e6" stroke-width="4" points="0,90 80,70 160,75 240,50 320,55 420,40"/>
+          <polyline fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="6 6" points="0,100 80,85 160,80 240,70 320,75 420,65"/>
+          <circle cx="420" cy="40" r="5" fill="#18a9e6"/>
+        </svg>
+        <div class="legend">Linha azul: entradas • Linha cinza: saídas</div>
+      </div>
+      <div class="panel">
+        <h4>Alertas do período</h4>
+        <div class="list">
+          <div class="item"><span>3 contas vencem esta semana</span><span class="badge">Ação</span></div>
+          <div class="item"><span>2 contas em atraso</span><span class="badge">Atenção</span></div>
+          <div class="item"><span>Saldo positivo mantido</span><span class="badge">OK</span></div>
+        </div>
+        <div class="footer-note">Este painel foi pensado para leitura rápida pela equipe administrativa.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="receber" class="section">
+    <h3>Contas a Receber</h3>
+    <p class="sub">Controle de recebimentos com visão por vencimento e status.</p>
+    <table>
+      <tr><th>Origem</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ação</th></tr>
+      <tr><td>Convênio</td><td>R$ 2.000</td><td>10/04</td><td><span class="status open">Aberto</span></td><td><button class="cta" onclick="fakeAction('Recebimento visualizado com sucesso')">Abrir</button></td></tr>
+      <tr><td>Particular</td><td>R$ 350</td><td>12/04</td><td><span class="status paid">Recebido</span></td><td><button class="cta" onclick="fakeAction('Recibo gerado na demonstração')">Recibo</button></td></tr>
+      <tr><td>Empresa parceira</td><td>R$ 1.240</td><td>18/04</td><td><span class="status late">Atrasado</span></td><td><button class="cta" onclick="fakeAction('Cobrança simulada enviada')">Cobrar</button></td></tr>
+    </table>
+  </section>
+
+  <section id="pagar" class="section">
+    <h3>Contas a Pagar</h3>
+    <p class="sub">Acompanhamento de despesas com foco em vencimentos e organização.</p>
+    <table>
+      <tr><th>Fornecedor</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ação</th></tr>
+      <tr><td>Aluguel</td><td>R$ 3.000</td><td>05/04</td><td><span class="status paid">Pago</span></td><td><button class="cta" onclick="fakeAction('Comprovante visualizado')">Ver</button></td></tr>
+      <tr><td>Energia</td><td>R$ 400</td><td>08/04</td><td><span class="status open">Aberto</span></td><td><button class="cta" onclick="fakeAction('Pagamento programado na demonstração')">Programar</button></td></tr>
+      <tr><td>Internet</td><td>R$ 200</td><td>01/04</td><td><span class="status late">Atrasado</span></td><td><button class="cta" onclick="fakeAction('Alerta de atraso registrado')">Alertar</button></td></tr>
+    </table>
+  </section>
+
+  <section id="fluxo" class="section">
+    <h3>Fluxo de Caixa</h3>
+    <p class="sub">Consolidação de entradas e saídas com saldo acumulado.</p>
+    <table>
+      <tr><th>Data</th><th>Descrição</th><th>Entrada</th><th>Saída</th><th>Saldo</th></tr>
+      <tr><td>01/04</td><td>Saldo inicial</td><td>-</td><td>-</td><td>R$ 5.000</td></tr>
+      <tr><td>02/04</td><td>Recebimento convênio</td><td>R$ 2.000</td><td>-</td><td>R$ 7.000</td></tr>
+      <tr><td>03/04</td><td>Pagamento energia</td><td>-</td><td>R$ 400</td><td>R$ 6.600</td></tr>
+      <tr><td>04/04</td><td>Recebimento particular</td><td>R$ 350</td><td>-</td><td>R$ 6.950</td></tr>
+    </table>
+  </section>
+
+  <section id="resumo" class="section">
+    <h3>Resumo Gerencial</h3>
+    <p class="sub">Leitura consolidada para apoio à decisão.</p>
+    <div class="grid-2">
+      <div class="panel">
+        <h4>Principais indicadores</h4>
+        <div class="list">
+          <div class="item"><span>Prazo médio de recebimento</span><strong>18 dias</strong></div>
+          <div class="item"><span>Percentual em atraso</span><strong style="color:var(--red)">6,2%</strong></div>
+          <div class="item"><span>Margem estimada do mês</span><strong style="color:var(--green)">31,2%</strong></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h4>Encaminhamentos sugeridos</h4>
+        <div class="list">
+          <div class="item"><span>Priorizar cobrança de títulos vencidos</span><span class="badge">1</span></div>
+          <div class="item"><span>Programar despesas fixas da semana</span><span class="badge">2</span></div>
+          <div class="item"><span>Fechar relatório mensal</span><span class="badge">3</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Novo lançamento</h3>
+    <p>Formulário demonstrativo para apresentar a experiência de uso ao cliente.</p>
+    <div class="form">
+      <div><label>Descrição</label><input value="Lançamento de exemplo" /></div>
+      <div><label>Valor</label><input value="R$ 450,00" /></div>
+      <div><label>Vencimento</label><input value="15/04/2026" /></div>
+      <div><label>Status</label><select><option>Aberto</option><option>Pago</option><option>Atrasado</option></select></div>
+      <div class="full"><label>Observações</label><textarea rows="3">Exemplo preenchido para demonstração comercial.</textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="cta" id="close-modal">Fechar</button>
+      <button class="cta primary" id="save-modal">Salvar demonstração</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Ação simulada com sucesso</div>
+
+<div class="modal-backdrop" id="export-modal">
+  <div class="modal" style="max-width:560px">
+    <h3>Relatório exportado</h3>
+    <p>O PDF demonstrativo foi gerado com sucesso. Clique no botão abaixo para baixar o arquivo de exemplo.</p>
+    <div class="modal-actions">
+      <button class="cta" id="close-export-modal">Fechar</button>
+      <button class="cta primary" id="download-pdf">Baixar PDF demonstrativo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const tabButtons = document.querySelectorAll('.tab-btn');
+const sections = document.querySelectorAll('.section');
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modal-title');
+const toast = document.getElementById('toast');
+
+function openTab(id){
+  tabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === id));
+  sections.forEach(sec => sec.classList.toggle('active', sec.id === id));
+}
+
+tabButtons.forEach(btn => btn.addEventListener('click', () => openTab(btn.dataset.tab)));
+
+document.getElementById('btn-receber').addEventListener('click', () => showModal('Novo recebimento'));
+document.getElementById('btn-pagar').addEventListener('click', () => showModal('Nova conta a pagar'));
+document.getElementById('btn-exportar').addEventListener('click', () => {
+  document.getElementById('export-modal').classList.add('show');
+});
+document.getElementById('close-modal').addEventListener('click', closeModal);
+document.getElementById('close-export-modal').addEventListener('click', () => {
+  document.getElementById('export-modal').classList.remove('show');
+});
+document.getElementById('download-pdf').addEventListener('click', downloadFakePDF);
+document.getElementById('save-modal').addEventListener('click', () => { closeModal(); fakeAction('Lançamento salvo na demonstração'); });
+modal.addEventListener('click', (e) => { if(e.target === modal) closeModal(); });
+document.getElementById('export-modal').addEventListener('click', (e) => {
+  if(e.target === document.getElementById('export-modal')) {
+    document.getElementById('export-modal').classList.remove('show');
+  }
+});
+
+function showModal(title){ modalTitle.textContent = title; modal.classList.add('show'); }
+function closeModal(){ modal.classList.remove('show'); }
+function fakeAction(message){
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function downloadFakePDF(){
+  const pdfContent = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 118 >>
+stream
+BT
+/F1 18 Tf
+50 780 Td
+(Relatório Demonstrativo - Clínica Foz) Tj
+0 -30 Td
+/F1 12 Tf
+(Este PDF foi gerado como amostra comercial da demonstração.) Tj
+0 -20 Td
+(Modelo 2 - Sistema Financeiro Estruturado) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000410 00000 n 
+trailer
+<< /Root 1 0 R /Size 6 >>
+startxref
+480
+%%EOF`;
+  const blob = new Blob([pdfContent], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'relatorio_demonstrativo_clinica_foz.pdf';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  document.getElementById('export-modal').classList.remove('show');
+  fakeAction('PDF demonstrativo baixado');
+}
+</script>
+</body>
+</html>
